@@ -1,6 +1,6 @@
 # Dotfiles (marshallfungai)
 
-Personal dotfiles — a collection of configuration files and setup scripts to create a consistent and efficient development environment across machines.
+Personal dotfiles — a collection of configuration files and setup scripts to create a consistent and efficient development environment across my machines.
 
 🔧 Tools included:
 - Bash config (`.bashrc`, `.bash_aliases`)
@@ -29,7 +29,7 @@ dotfiles/
 
 ### 1. Clone the repo:
 ```bash
-git clone https://github.com/yourname/dotfiles.git  ~/.dotfiles
+git clone https://github.com/marshallfungai/dotfiles.git  ~/.dotfiles
 cd ~/.dotfiles
 ```
 
