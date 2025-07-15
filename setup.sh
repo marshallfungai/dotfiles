@@ -15,6 +15,47 @@ usage() {
   exit 1
 }
 
+# --- UTILITY FUNCTION ---
+
+safe_link() {
+  local src="$1"
+  local dest="$2"
+
+  if [ -e "$dest" ] || [ -L "$dest" ]; then
+    echo "⚠️  Backing up '$dest'"
+    mv "$dest" "${dest}.backup"
+  fi
+
+  ln -s "$src" "$dest"
+  echo "🔗 Linked: $dest"
+}
+
+
+safe_link() {
+  local src="$1"
+  local dest="$2"
+
+  if [ -e "$dest" ] || [ -L "$dest" ]; then
+    echo "⚠️  Backing up '$dest'"
+    mv "$dest" "${dest}.backup"
+  fi
+
+  ln -s "$src" "$dest"
+  echo "🔗 Linked: $dest"
+}
+
+safe_link() {
+  local src="$1"
+  local dest="$2"
+
+  if [ -e "$dest" ] || [ -L "$dest" ]; then
+    echo "⚠️  Backing up '$dest'"
+    mv "$dest" "${dest}.backup"
+  fi
+
+  ln -s "$src" "$dest"
+  echo "🔗 Linked: $dest"
+}
 # --- PACKAGE INSTALLERS ---
 
 install_tmux() {
@@ -36,19 +77,19 @@ install_all_pkgs() {
 
 link_common() {
   echo "Linking common files..."
-  ln -sf "$DOTFILES/common/.bashrc" "$HOME/.bashrc"
-  ln -sf "$DOTFILES/common/.bash_aliases" "$HOME/.bash_aliases"
+  safe_link "$DOTFILES/common/.bashrc" "$HOME/.bashrc"
+  safe_link "$DOTFILES/common/.bash_aliases" "$HOME/.bash_aliases"
 }
 
 link_tmux() {
   echo "Linking Tmux config..."
-  ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
+  safe_link "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 }
 
 link_neovim() {
   echo "Linking Neovim config..."
   mkdir -p "$HOME/.config/nvim"
-  ln -sf "$DOTFILES/neovim/.config/nvim/init.lua" "$HOME/.config/nvim/init.lua"
+  safe_link "$DOTFILES/neovim/.config/nvim/init.lua" "$HOME/.config/nvim/init.lua"
 }
 
 link_all_configs() {
