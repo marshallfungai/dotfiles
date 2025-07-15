@@ -1,13 +1,15 @@
-# Dotfiles (marshallfungai)
+# Dotfiles : Development Setup (marshallfungai)
 
-Personal dotfiles — a collection of configuration files and setup scripts to create a consistent and efficient development environment across my machines.
+Personal dotfiles — a collection of configuration files and setup scripts to create a consistent and efficient development environment across my dev machines.
 
 🔧 Tools included:
 - Bash config (`.bashrc`, `.bash_aliases`)
 - Tmux config (`.tmux.conf`)
-- Neovim config (`init.lua`)
+- Neovim config (`init.lua`) 
 
-NOTE : Commands only work with apt package manager (Debian/Ubuntu)
+NOTE : 
+- Commands only work with apt package manager (Debian/Ubuntu)
+- Neovim credit to (https://github.com/nvim-lua/kickstart.nvim)
 
 ## 📁 Folder Structure
 
