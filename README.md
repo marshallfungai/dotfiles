@@ -23,7 +23,10 @@ dotfiles/
 │   └── .tmux.conf
 │
 ├── neovim/               # Neovim config
-│   └── .config/nvim/init.lua
+│   └── init.lua
+|   └── lua/kickstart/plugins/...
+│   └── lua/kickstart/health.lua
+│   └── lua/custom/plugins/init.lua
 │
 ├── setup.sh              # Setup script (safe install/link)
 └── README.md             # This file
