@@ -7,6 +7,8 @@ Personal dotfiles — a collection of configuration files and setup scripts to c
 - Tmux config (`.tmux.conf`)
 - Neovim config (`init.lua`)
 
+NOTE : Commands only work with apt package manager (Debian/Ubuntu)
+
 ## 📁 Folder Structure
 
 ```
