@@ -31,31 +31,6 @@ safe_link() {
 }
 
 
-safe_link() {
-  local src="$1"
-  local dest="$2"
-
-  if [ -e "$dest" ] || [ -L "$dest" ]; then
-    echo "⚠️  Backing up '$dest'"
-    mv "$dest" "${dest}.backup"
-  fi
-
-  ln -s "$src" "$dest"
-  echo "🔗 Linked: $dest"
-}
-
-safe_link() {
-  local src="$1"
-  local dest="$2"
-
-  if [ -e "$dest" ] || [ -L "$dest" ]; then
-    echo "⚠️  Backing up '$dest'"
-    mv "$dest" "${dest}.backup"
-  fi
-
-  ln -s "$src" "$dest"
-  echo "🔗 Linked: $dest"
-}
 # --- PACKAGE INSTALLERS ---
 
 install_tmux() {
@@ -89,7 +64,11 @@ link_tmux() {
 link_neovim() {
   echo "Linking Neovim config..."
   mkdir -p "$HOME/.config/nvim"
-  safe_link "$DOTFILES/neovim/.config/nvim/init.lua" "$HOME/.config/nvim/init.lua"
+
+  # Link main config file
+  safe_link "$DOTFILES/neovim/init.lua" "$HOME/.config/nvim/init.lua"
+  # Link lua folder (contains all modules)
+  safe_link "$DOTFILES/neovim/lua" "$HOME/.config/nvim/lua"
 }
 
 link_all_configs() {
