@@ -55,11 +55,6 @@ To install everything:
 To install only packages:
 ```bash
 ./setup.sh --install
-``
-
-To link only configs:
-```bash
-./setup.sh --link
 ```
 
 To install/link specific tools:

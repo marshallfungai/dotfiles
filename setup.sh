@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 DOTFILES="$HOME/.dotfiles"
 
@@ -56,14 +56,25 @@ link_common() {
   safe_link "$DOTFILES/common/.bash_aliases" "$HOME/.bash_aliases"
 }
 
-link_tmux() {
+config_tmux() {
   echo "Linking Tmux config..."
+  
+  read -p "Do you want to install Tmux ? (Y/N) : " resp
+  if [ -z "$resp" ] || [ "$resp" = "Y" ]; then 
+    install_tmux
+  fi  
+  
   safe_link "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 }
 
-link_neovim() {
+config_neovim() {
   echo "Linking Neovim config..."
   mkdir -p "$HOME/.config/nvim"
+
+  read -p "Do you want to install Neovim ? (Y/N) : " resp
+  if [ -z "$resp" ] || [ "$resp" = "Y" ]; then 
+    install_neovim
+  fi  
 
   # Link main config file
   safe_link "$DOTFILES/neovim/init.lua" "$HOME/.config/nvim/init.lua"
@@ -73,8 +84,8 @@ link_neovim() {
 
 link_all_configs() {
   link_common
-  link_tmux
-  link_neovim
+  config_tmux
+  config_neovim
 }
 
 # --- MAIN LOGIC ---
@@ -86,7 +97,6 @@ if [[ -z "$ARGS" ]]; then
 fi
 
 INSTALL_ONLY=0
-LINK_ONLY=0
 
 if ! command -v apt &> /dev/null; then
   echo "Error: This script requires apt package manager (Debian/Ubuntu)"
@@ -98,11 +108,7 @@ for arg in $ARGS; do
     --install)
       INSTALL_ONLY=1
       ;;
-    --link)
-      LINK_ONLY=1
-      ;;
     --all)
-      install_all_pkgs
       link_all_configs
       echo "Setup completed successfully!"
       exit 0
@@ -112,13 +118,11 @@ for arg in $ARGS; do
       ;;
     --tmux)
       if [[ $INSTALL_ONLY -eq 1 ]]; then install_tmux
-      elif [[ $LINK_ONLY -eq 1 ]]; then link_tmux
-      else install_tmux && link_tmux; fi
+      else config_tmux; fi
       ;;
     --neovim)
       if [[ $INSTALL_ONLY -eq 1 ]]; then install_neovim
-      elif [[ $LINK_ONLY -eq 1 ]]; then link_neovim
-      else install_neovim && link_neovim; fi
+      else config_neovim; fi
       ;;
     -h|--help)
       usage
