@@ -43,7 +43,7 @@ dotfiles/
    ```bash
    git clone https://github.com/marshallfungai/dotfiles.git  ~/.dotfiles
    cd ~/.dotfiles
-   bootstrap.sh
+   
    ```
 
 ### 2. Preinstall (Optional) 
@@ -51,7 +51,7 @@ dotfiles/
    ```bash
    chmod 744 bootstrap.sh  # rwx for owner, r for others  
    chmod +x bootstrap.sh
-   cd ~/.dotfiles
+   bootstrap.sh
    ```
   Restart your shell or run `source ~/.bashrc`.
 
