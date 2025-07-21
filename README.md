@@ -46,7 +46,7 @@ dotfiles/
 
 ### 2. Preinstall (Optional) 
    
-     ```bash
+   ```bash
    chmod 744 bootstrap.sh  # rwx for owner, r for others  
    chmod +x bootstrap.sh
    cd ~/.dotfiles
@@ -55,8 +55,9 @@ dotfiles/
 
 
 ### 3. Make setup script executable:
+### If bootstrap.sh was NOT executed otherwise use to reconfigure symlinks anytime.
    ```bash
-   stow -t ~ neovim  # Deploys only neovim
+   stow -t ~ neovim            # Deploys only neovim
    stow -t ~ bash tmux neovim  # Deploys all dotfiles to ~/
    ```
     
