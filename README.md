@@ -58,3 +58,9 @@ cd ~/.dotfiles
 stow -t ~ neovim  # Deploys only neovim
 stow -t ~ bash tmux neovim  # Deploys all dotfiles to ~/
 ```
+
+## Dependences - Packages 
+
+### Might be added to preinstall bash/zsh script
+
+ - Dos2files - Convert to unix line endings if you use WSL or have edited with some windows tools 
