@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
 
-# System utilities
-
-# Check if a command exists
-command_exists() {
-  command -v "$1" &> /dev/null
-}
-
-# Check if a package is installed
-package_installed() {
-  command_exists "$1"
-}
-
+# Utilities can be reused in other scripts
 
 # Detect OS and package manager
 get_pkg_manager() {

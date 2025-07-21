@@ -15,6 +15,9 @@ NOTE :
 
 ```
 dotfiles/
+├── utils/                      
+│   ├── .utils.sh                # System utilities (can be reused) - specially bootstrap.sh and uninstall.sh
+│
 ├── bashrc/                      # Bash config
 │   ├── .bashrc
 │   └── .bash_aliases
