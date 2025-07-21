@@ -8,61 +8,60 @@ Dotfiles — a collection of configuration files and setup scripts to create a c
 - Tmux config (`.tmux.conf`)
 - Neovim config (`init.lua`) 
 
-NOTE : 
-- Neovim credit to (https://github.com/nvim-lua/kickstart.nvim)
+NOTE: Neovim config is based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim).
 
 ## 📁 Folder Structure
 
 ```
 dotfiles/
 ├── utils/                      
-│   ├── .utils.sh                # System utilities (can be reused) - specially bootstrap.sh and uninstall.sh
+│   ├── sys_utils.sh            # System utilities (shared by bootstrap.sh and uninstall.sh)
 │
-├── bashrc/                      # Bash config
+├── bash/                       # Bash config
 │   ├── .bashrc
 │   └── .bash_aliases
 │
-├── tmux/                        # Tmux config
+├── tmux/                       # Tmux config
 │   └── .tmux.conf
 │   
-│   nvim/
-|     .config
-|        ├── nvim/               # Neovim config
-|        │   └── init.lua
-|        |   └── lua/kickstart/plugins/...
-|        │   └── lua/kickstart/health.lua
-|        │   └── lua/custom/plugins/init.lua
-|        │
-└── bootstrap.sh                # Boostrap file to install dependences initially and also run stow for symlinks
-└── uninstall.sh                # Uninstall and/or remove stow symlinks
+├── nvim/                       # Neovim config
+│   └── .config/
+│       └── nvim/
+│           ├── init.lua
+│           └── lua/
+│               ├── kickstart/
+│               └── custom/
+│
+├── bootstrap.sh                # Install dependencies and set up symlinks
+├── uninstall.sh                # Remove symlinks and uninstall packages
 └── README.md                   # This file
 ```
 
 ## 🚀 How to Use
 
-
-
 ### 1. Clone the repo:
-   ```bash
-   git clone https://github.com/marshallfungai/dotfiles.git  ~/.dotfiles
-   cd ~/.dotfiles
-   
-   ```
+```bash
+git clone https://github.com/marshallfungai/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+```
 
-### 2. Preinstall (Optional) 
-   
-   ```bash
-   chmod 744 bootstrap.sh  # rwx for owner, r for others  
-   chmod +x bootstrap.sh
-   bootstrap.sh
-   ```
-  Restart your shell or run `source ~/.bashrc`.
+### 2. Run the bootstrap script:
+```bash
+chmod +x bootstrap.sh
+./bootstrap.sh
+```
+Restart your shell or run `source ~/.bashrc` to apply changes.
+
+### 3. Deploy symlinks (if not done by bootstrap.sh):
+```bash
+stow -t ~ bash tmux nvim  # Deploys all dotfiles to ~/
+```
+
+### 4. Uninstall (optional):
+```bash
+chmod +x uninstall.sh
+./uninstall.sh
+```
 
 
-### 3. Make setup script executable:
-### If bootstrap.sh was NOT executed otherwise use to reconfigure symlinks anytime.
-   ```bash
-   stow -t ~ neovim            # Deploys only neovim
-   stow -t ~ bash tmux neovim  # Deploys all dotfiles to ~/
-   ```
     
