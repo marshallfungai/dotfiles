@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Dotfiles bootstrap script (run once).
+
+set -euo pipefail  # Strict error handling
 
 # Detect OS and package manager
 get_pkg_manager() {
@@ -10,7 +13,7 @@ get_pkg_manager() {
     Linux*)
       os_type="Linux"
       # Check for WSL
-      if grep -qi "microsoft" /proc/version; then
+      if [[ -n "$WSL_DISTRO_NAME" ]] || grep -qi "microsoft" /proc/version; then
         os_type="WSL"
       fi
       # Check for apt (Debian/Ubuntu)
@@ -43,11 +46,19 @@ get_pkg_manager() {
 
 install_pkg() {
   local pkg="$1"
+  if [[ ! "$pkg" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    echo "Error: Invalid package name '$pkg'" >&2
+    return 1
+  fi
+  if ! command -v sudo &> /dev/null; then
+    echo "Error: 'sudo' not found. Run as root or install sudo." >&2
+    return 1
+  fi
   IFS=':' read -r os_type pkg_manager <<< "$(get_pkg_manager)"
 
   case "$pkg_manager" in
     apt)
-      sudo apt-get install -y "$pkg" ;;
+      sudo apt-get install -y "$pkg" || { echo "Failed to install $pkg"; return 1; } ;;
     brew)
       brew install "$pkg" ;;
     yum)
@@ -62,8 +73,12 @@ install_pkg() {
 }
 
 
-# Usage:
+# Main
+echo "=== Bootstrapping dotfiles ==="
+install_pkg bind9-dnsutils
 install_pkg stow
 install_pkg tmux
 install_pkg neovim
-install_pkg bind9-dnsutils
+
+# Can be run multiple times to update configs
+stow bash nvim tmux  # Symlink configs to $HOME
