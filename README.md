@@ -31,6 +31,7 @@ dotfiles/
 |        │   └── lua/custom/plugins/init.lua
 |        │
 └── bootstrap.sh                # Boostrap file to install dependences initially and also run stow for symlinks
+└── uninstall.sh                # Uninstall and/or remove stow symlinks
 └── README.md                   # This file
 ```
 
