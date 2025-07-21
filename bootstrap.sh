@@ -4,7 +4,7 @@
 set -euo pipefail  # Strict error handling
 
 # Source the system utilities
-source utils/sys_utils.sh
+source utils/dotfiles_utils.sh
 
 read -p "Install packages (bind9-dnsutils, stow, tmux, neovim)? (y/n): " install_packages
 if [ "$install_packages" == "y" ]; then

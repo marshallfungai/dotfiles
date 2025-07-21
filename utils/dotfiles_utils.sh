@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-# Utilities can be reused in other scripts
+# Dotfiles Utilities can be reused in other scripts
+# This file is shared by bootstrap.sh and uninstall.sh
+# NOTE: For system utilities, check utils/utils.sh
 
 # Detect OS and package manager
 get_pkg_manager() {

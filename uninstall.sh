@@ -3,7 +3,7 @@
 set -euo pipefail  # Strict error handling
 
 # Source the system utilities
-source utils/sys_utils.sh
+source utils/dotfiles_utils.sh
 
 
 remove_symlinks() {
