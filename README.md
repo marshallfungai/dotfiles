@@ -15,7 +15,7 @@ NOTE: Neovim config is based on [kickstart.nvim](https://github.com/nvim-lua/kic
 ```
 dotfiles/
 ├── utils/                      
-│   ├── sys_utils.sh            # System utilities (shared by bootstrap.sh and uninstall.sh)
+│   ├── utils.sh            # System utilities (shared by bootstrap.sh and uninstall.sh)
 │
 ├── bash/                       # Bash config
 │   ├── .bashrc
