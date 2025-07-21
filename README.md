@@ -15,7 +15,7 @@ NOTE :
 
 ```
 dotfiles/
-├── bashrc/                       # Shared configs
+├── bashrc/                      # Bash config
 │   ├── .bashrc
 │   └── .bash_aliases
 │
