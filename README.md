@@ -15,11 +15,11 @@ NOTE :
 
 ```
 dotfiles/
-├── bashrc/               # Shared configs
+├── bashrc/                       # Shared configs
 │   ├── .bashrc
 │   └── .bash_aliases
 │
-├── tmux/                 # Tmux config
+├── tmux/                        # Tmux config
 │   └── .tmux.conf
 │   
 │   nvim/
@@ -30,7 +30,8 @@ dotfiles/
 |        │   └── lua/kickstart/health.lua
 |        │   └── lua/custom/plugins/init.lua
 |        │
-└── README.md             # This file
+└── bootstrap.sh                # Boostrap file to install dependences initially and also run stow for symlinks
+└── README.md                   # This file
 ```
 
 ## 🚀 How to Use
