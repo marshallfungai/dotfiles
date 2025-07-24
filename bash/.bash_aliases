@@ -32,6 +32,11 @@ alias gc='git commit'
 alias gp='git push'
 alias gl='git pull'
 
+# Tmux
+alias tmuxls='tmux ls'
+alias tmuxatt='tmux attach -t'
+alias tmuxks='tmux kill-session -t'
+
 # Docker
 alias dps='docker ps'
 alias di='docker images'
