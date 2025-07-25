@@ -409,7 +409,7 @@ require('lazy').setup({
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',    opts = {} },
 
       -- Allows extra capabilities provided by blink.cmp
       'saghen/blink.cmp',
@@ -935,11 +935,11 @@ require('lazy').setup({
     },
   },
 })
-
-vim.keymap.set('n', '<leader>qw', ':Neotree filesystem reveal left<CR>', { desc = 'Toggle Neo-tree left' })
-vim.keymap.set('n', '<leader>qe', ':Neotree position=current<CR>', { desc = 'Toggle Neo-tree full' })
-vim.keymap.set('n', '<leader>qr', ':Neotree filesystem reveal right<CR>', { desc = 'Toggle Neo-tree right' })
-vim.keymap.set('n', '<leader>qs', ':Neotree filesystem reveal close<CR>', { desc = 'Toggle Neo-tree close' })
+-- Example: Use <leader>n (for "NeoTree")
+vim.keymap.set('n', '<leader>nw', ':Neotree filesystem reveal left<CR>', { desc = 'NeoTree left' })
+vim.keymap.set('n', '<leader>ne', ':Neotree toggle position=current<CR>', { desc = 'NeoTree current' })
+vim.keymap.set('n', '<leader>nr', ':Neotree filesystem reveal right<CR>', { desc = 'NeoTree right' })
+vim.keymap.set('n', '<leader>ns', ':Neotree close<CR>', { desc = 'Close NeoTree' })
 
 -- The line beneath this is callej `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
