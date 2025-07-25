@@ -1,19 +1,9 @@
 # MARSHALLL FUNGAI#
 
-# kickstart.nvim 
+# Credit : kickstart.nvim 
 # 
 
 ## Introduction
 
-### For more details, please view [Neovim Kickstart](https://github.com/nvim-lua/kickstart.nvim)
-
-<details><summary> Linux and Mac </summary>
-
-```sh
-git clone https://github.com/nvim-lua/kickstart.nvim.git "${XDG_CONFIG_HOME:-$HOME/.config}"/nvim
-```
-
-</details>
-
-```
-
+Customized version of kickstarter.nvim
+I should mention that 'lua/theWire/" is the custom file.
