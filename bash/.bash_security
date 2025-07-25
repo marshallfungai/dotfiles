@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# WSL SSH Agent Integration (Windows ↔ WSL2)
+if grep -qi microsoft /proc/version &>/dev/null || [[ -n "$WSL_DISTRO_NAME" ]]; then
+  # 1. Verify Windows SSH agent is actually running
+  if powershell.exe -nologo -noprofile -command "Get-Service ssh-agent -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status" 2>/dev/null | grep -q "Running"; then
+    
+    # 2. Secure socket setup (avoids race conditions)
+    export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+    if ! ss -o state established '( dport = ssh )' -a 2>/dev/null | grep -q "$SSH_AUTH_SOCK"; then
+      rm -f "$SSH_AUTH_SOCK"
+      if [ -S "/mnt/wslg/runtime-dir/openssh-ssh-agent" ]; then
+        ln -sf "/mnt/wslg/runtime-dir/openssh-ssh-agent" "$SSH_AUTH_SOCK"
+      fi
+    fi
+
+    # 3. Critical security enhancement: IdentitiesOnly + strict config
+    alias ssh='ssh -o IdentitiesOnly=yes -o PreferredAuthentications=publickey'
+    alias scp='scp -o IdentitiesOnly=yes -o PreferredAuthentications=publickey'
+    alias sftp='sftp -o IdentitiesOnly=yes -o PreferredAuthentications=publickey'
+
+    # 4. PEM-friendly helper (auto-adds keys with passphrase caching)
+    ssh-add-safe() {
+      local key="$1"
+      if [ -f "$key" ] && ! ssh-add -l | grep -qF "$key"; then
+        if ssh-add "$key" &>/dev/null; then
+          echo "🔐 Added $key to agent"
+        else
+          echo "❌ Failed to add $key (is it encrypted?)" >&2
+        fi
+      fi
+    }
+  fi
+fi

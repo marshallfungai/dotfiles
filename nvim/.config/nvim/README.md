@@ -1,9 +1,7 @@
 # MARSHALLL FUNGAI#
+### Credit : kickstart.nvim 
 
-# Credit : kickstart.nvim 
-# 
-
-## Introduction
+## Note
 
 Customized version of kickstarter.nvim
-I should mention that 'lua/theWire/" is the custom file.
+I should mention that 'lua/theWire/" is the custom neovim folder.

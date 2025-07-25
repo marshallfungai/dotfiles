@@ -31,7 +31,7 @@ dotfiles/
 │           ├── init.lua
 │           └── lua/
 │               ├── kickstart/
-│               └── custom/
+│               └── theWire/    # The custom neovim config
 │
 ├── bootstrap.sh                # Install dependencies and set up symlinks
 ├── uninstall.sh                # Remove symlinks and uninstall packages
