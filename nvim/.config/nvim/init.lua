@@ -6,8 +6,8 @@
 --]]
 
 -- THE WIRE CONFIG
-require 'theWire.options'
-require 'theWire.keymaps'
+require 'marshallfungai.options'
+require 'marshallfungai.keymaps'
 
 
 -- [[ Basic Autocommands ]]
