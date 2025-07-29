@@ -42,7 +42,11 @@ dotfiles/
 ├── bootstrap.sh                # Install dependencies and set up symlinks
 ├── uninstall.sh                # Remove symlinks and uninstall packages
 └── README.md                   # This file
-``` ## 🚀 How to Use
+``` 
+---
+
+## 🚀 How to Use
+
 ### 1. Clone the repo:
 ```bash
 git clone https://github.com/marshallfungai/dotfiles.git ~/.dotfiles
