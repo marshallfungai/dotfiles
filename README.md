@@ -23,6 +23,12 @@ dotfiles/
 │   └── .bash_aliases
 │
 ├── tmux/                       # Tmux config
+│   ├── .tmux/plugins           
+│   |     └── plugins/           # Tmux plugins directory  
+|   |
+│   |     └── .keybindings.conf  # Keybindings  
+│   |     └── .statusbar.conf    # Statusbar
+|   | 
 │   └── .tmux.conf
 │   
 ├── nvim/                       # Neovim config
