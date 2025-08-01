@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+# Only runs in window linux subsystem
+# This file is sourced by .bashrc
+
+
+# WSL2 SSH Agent Integration (Named Pipe Version)
+function bash_wsl_ssh_setup() {
+  
+  # Check if Windows SSH agent is running
+  win_ssh_agent_status=$(powershell.exe -nologo -noprofile -command \
+    "(Get-Service ssh-agent -ErrorAction SilentlyContinue).Status" 2>/dev/null | tr -d '\r\n')
+
+    if [[ -n "$win_ssh_agent_status" && "$win_ssh_agent_status" == "Running" ]]; then
+
+      # Named pipe path (Windows format)
+      WIN_SSH_PIPE="\\.\\pipe\\openssh-ssh-agent"
+      
+      # Use socat to bridge named pipe ↔ Unix socket
+      export SSH_AUTH_SOCK="${HOME}/.ssh/ssh-agent.sock"
+
+      if ! pgrep -f "socat.*${SSH_AUTH_SOCK}" >/dev/null; then
+        
+        rm -f "$SSH_AUTH_SOCK"
+        echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+        chmod +x ~/bin/npiperelay.exe
+        
+        if command -v socat >/dev/null; then
+          if command -v npiperelay.exe >/dev/null; then
+            # Start socat in background (persistent)
+            nohup socat "UNIX-LISTEN:${SSH_AUTH_SOCK},fork" \
+              "EXEC:'npiperelay.exe -ei -s ${WIN_SSH_PIPE}',nofork" >/dev/null 2>&1 &
+          else
+            echo "⚠️ npiperelay.exe not found in PATH"
+            echo "Automatically install it with:"
+            echo "  install_npiperelay"
+            echo "Or download it from:"
+            echo "  https://github.com/jstarks/npiperelay/releases"
+            echo "And place it in a directory in your PATH (e.g., ~/bin)"
+            return 1
+          fi
+        else
+          echo "⚠️ socat not installed. Install with:"
+          echo "  sudo apt-get install socat"
+          return 1
+        fi
+      fi
+
+      # Security-hardened aliases
+      alias ssh='command ssh -o IdentitiesOnly=yes -o PreferredAuthentications=publickey'
+      alias scp='command scp -o IdentitiesOnly=yes -o PreferredAuthentications=publickey'
+      
+      # Key management
+      ssh-add-list() {
+        powershell.exe -nologo -noprofile -command "ssh-add -l"
+      }
+    else
+      echo "⚠️ Could not find Windows SSH Agent"
+      echo "⚠️ Start Windows SSH Agent first:"
+      echo "  PowerShell: Set-Service ssh-agent -StartupType Automatic"
+      echo "  PowerShell: Start-Service ssh-agent"
+    fi
+}
+
+# Use Windows' DNS resolution for hostnames 
+function do_wsl_dns_setup() {
+  export WSL_HOST=$(grep -m1 -oP "nameserver \K.+" /etc/resolv.conf)
+
+   # Fetch Windows proxy settings (suppress errors)
+  WIN_PROXY=$(powershell.exe -nologo -noprofile -command \
+    "netsh winhttp show proxy" 2>/dev/null | grep -oP "Proxy Server\s*:\s*\K[^:]+:\d+")
+  
+  # Extract host:port (fallback if proxy is disabled)
+  if [[ -n "$WIN_PROXY" ]]; then
+    PROXY_HOST_PORT="$WIN_PROXY"
+  else
+    PROXY_HOST_PORT="${WSL_HOST}:3128"  # Fallback (e.g., no proxy or WSL default)
+  fi
+
+  alias ssh-proxy="command ssh -o ProxyCommand='nc -X connect -x ${WSL_HOST}:${PROXY_HOST_PORT} %h %p'"
+  alias scp-proxy="command scp -o ProxyCommand='nc -X connect -x ${WSL_HOST}:${PROXY_HOST_PORT} %h %p'"
+}
+
+# Install npiperelay.exe from github.com/jstarks/npiperelay/releases
+function install_npiperelay() {
+  NPIPE_RELAY_DIR="${HOME}/bin"
+  NPIPE_RELAY_URL="https://github.com/jstarks/npiperelay/releases/latest/download/npiperelay_windows_amd64.zip"
+  
+  if [[ -n "$1" ]]; then
+    NPIPE_RELAY_URL="$1"
+  fi
+
+  if ! command -v npiperelay.exe >/dev/null; then
+    echo "Installing npiperelay..."
+    mkdir -p "${NPIPE_RELAY_DIR}"
+    curl -L "${NPIPE_RELAY_URL}" -o /tmp/npiperelay.zip
+    unzip /tmp/npiperelay.zip -d ~/bin
+    chmod +x ~/bin/npiperelay.exe
+    rm /tmp/npiperelay.zip
+    echo "✅ npiperelay installed to ~/bin"
+  fi
+}
+
+
+# Only run if in WSL
+if grep -qi microsoft /proc/version &>/dev/null || [[ -n "$WSL_DISTRO_NAME" ]]; then
+
+  # SSH agent
+  alias wsl_ssh_setup="bash_wsl_ssh_setup"
+  alias install_npiperelay="install_npiperelay"
+  
+  # DNS resolution
+  do_wsl_dns_setup
+fi
+

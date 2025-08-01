@@ -21,7 +21,7 @@ alias edrive='cd /mnt/e'
 alias fdrive='cd /mnt/f'
 
 # Basic shortcuts
-alias ll='ls -la'
+alias ll='ls -laF'
 alias la='ls -A'
 alias l='ls -CF'
 
@@ -52,8 +52,7 @@ alias localip="ipconfig getifaddr en0"
 alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
 
 # SSH
-# In WSL
-alias sshwsl='ssh -o IdentitiesOnly=yes'
+alias ssh='command ssh -o IdentitiesOnly=yes'
 
 # Compare SHA-256 of two files
 alias sha256cmp='cmp_sha256() { [ "$(sha256sum "$1" | cut -d" " -f1)" = "$(sha256sum "$2" | cut -d" " -f1)" ] && echo "MATCH" || echo "DIFFERENT"; }; cmp_sha256'
@@ -126,4 +125,20 @@ check_ssl() {
     openssl s_client -connect "$1" 2>/dev/null | openssl x509 -noout -dates
 }
 
+
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# colored GCC warnings and errors
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
