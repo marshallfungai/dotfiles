@@ -13,13 +13,78 @@ local servers = {
   lua_ls = {
     settings = {
       Lua = {
-        format = { enable = true }, 
+        format = { enable = true },
       },
     },
   },
   phpactor = {},
   ts_ls = {},
   bashls = {},
+
+  -- Dart/Flutter LSP
+  dart = {
+    cmd = { 'dart', 'language-server', '--protocol=lsp' },
+    init_options = {
+      closingLabels = true,
+      flutterOutline = true,
+      onlyAnalyzeProjectsWithOpenFiles = false,
+      outline = true,
+      suggestFromUnimportedLibraries = true,
+    },
+    settings = {
+      dart = {
+        completeFunctionCalls = true,
+        showTodos = true,
+        enableSnippets = true,
+      },
+    },
+  },
+
+  -- Go LSP
+  gopls = {
+    settings = {
+      gopls = {
+        analyses = {
+          unusedparams = true,
+          shadow = true,
+        },
+        staticcheck = true,
+        gofumpt = true, -- Enable stricter formatting
+        hints = {
+          assignVariableTypes = true,
+          compositeLiteralFields = true,
+          constantValues = true,
+          functionTypeParameters = true,
+        },
+      },
+    },
+    -- Custom on_attach for Go-specific keymaps
+    on_attach = function(client, bufnr)
+      -- Test execution
+      vim.keymap.set('n', '<leader>Ggt', function()
+        require('go.test').run()
+      end, '[G]o [T]est')
+
+      vim.keymap.set('n', '<leader>GgT', function()
+        require('go.test').run_all()
+      end, '[G]o Test [A]ll')
+
+      -- Add tags (json, yaml, etc.)
+      vim.keymap.set('n', '<leader>Gga', function()
+        require('go.tags').add()
+      end, '[G]o [A]dd tags')
+
+      -- Fill struct
+      vim.keymap.set('n', '<leader>Ggf', function()
+        require('go.reftool').fillstruct()
+      end, '[G]o [F]ill struct')
+
+      -- Debugging (if installed)
+      vim.keymap.set('n', '<leader>Ggd', function()
+        require('go.debug').debug()
+      end, '[G]o [D]ebug')
+    end,
+  },
 }
 
 return {
@@ -126,14 +191,14 @@ return {
           -- Jump to the type of the word under your cursor.
           map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
 
-          -- Formatting 
+          -- Formatting
           map('FF', function()
-            vim.lsp.buf.format({ async = true, timeout_ms = 5000 })
+            vim.lsp.buf.format { async = true, timeout_ms = 5000 }
           end, '[F]ormat [F]ile')
-          
+
           -- Visual mode formatting
           map('FF', function()
-            vim.lsp.buf.format({ async = true, range = vim.lsp.util.make_given_range_params().range })
+            vim.lsp.buf.format { async = true, range = vim.lsp.util.make_given_range_params().range }
           end, '[F]ormat selection', 'v')
 
           -- Diagnostics
@@ -141,7 +206,7 @@ return {
           map('<leader>ln', vim.diagnostic.goto_next, '[L]SP [N]ext diagnostic')
           map('<leader>lp', vim.diagnostic.goto_prev, '[L]SP [P]revious diagnostic')
           map('<leader>la', function()
-            vim.diagnostic.setqflist({ open = true })
+            vim.diagnostic.setqflist { open = true }
           end, '[L]SP [A]ll diagnostics')
 
           local function client_supports_method(client, method, bufnr)
@@ -210,4 +275,3 @@ return {
     end,
   },
 }
-

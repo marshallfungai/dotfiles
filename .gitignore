@@ -1,0 +1,89 @@
+# Git ignore file
+# Extensions where computer generated on the context of least access
+# In other words, anything I did not approve, does not go to the cloud
+
+# Custom files
+bash/.wsl-bakcup
+
+# General system files
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# OS generated files
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+._*
+
+# Temporary files
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+*.pid
+*.seed
+*.pid.lock
+
+# IDE specific files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Vim swap files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+
+# Vim session files
+Session.vim
+
+# Emacs backup files
+\#*
+.\#*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ruby
+*.gem
+.bundle
+.ruby-version
+
+# Go
+/bin/
+/pkg/
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.out
+
+# Logs
+*.log
+logs/
+
+# Local configuration files that shouldn't be committed
+.local
+.cache/
+.env
+.secret
+.config/*/private
