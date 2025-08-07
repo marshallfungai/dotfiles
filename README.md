@@ -21,11 +21,14 @@ dotfiles/
 ├── bash/                       # Bash config
 │   ├── .bashrc
 │   └── .bash_aliases
+|   |__ .bash_wsl
+|   |__ .bash_security 
+|   |__ .bash_aws 
 │
 ├── tmux/                       # Tmux config
 │   ├── .tmux/plugins           
 │   |     └── plugins/           # Tmux plugins directory  
-|   |
+|   |     |
 │   |     └── .keybindings.conf  # Keybindings  
 │   |     └── .statusbar.conf    # Statusbar
 |   | 
