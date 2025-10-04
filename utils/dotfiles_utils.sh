@@ -14,7 +14,7 @@ get_pkg_manager() {
     Linux*)
       os_type="Linux"
       # Check for WSL
-      if [[ -n "$WSL_DISTRO_NAME" ]] || grep -qi "microsoft" /proc/version; then
+      if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi "microsoft" /proc/version; then
         os_type="WSL"
       fi
       # Check for apt (Debian/Ubuntu)
@@ -59,13 +59,17 @@ install_pkg() {
 
   case "$pkg_manager" in
     apt)
-      sudo apt-get install -y "$pkg" || { echo "Failed to install $pkg"; return 1; } ;;
+      sudo apt-get install -y "$pkg" || { echo "Failed to install $pkg"; return 1; }
+      ;;
     brew)
-      brew install "$pkg" ;;
+      brew install "$pkg"
+      ;;
     yum)
-      sudo yum install -y "$pkg" ;;
+      sudo yum install -y "$pkg"
+      ;;
     pacman)
-      sudo pacman -S --noconfirm "$pkg" ;;
+      sudo pacman -S --noconfirm "$pkg"
+      ;;
     *)
       echo "Error: No supported package manager found for $os_type!" >&2
       return 1
@@ -98,14 +102,14 @@ uninstall_pkg() {
       brew uninstall "$pkg" ;;
     yum)
       if rpm -q "$pkg" &> /dev/null; then
-        sudo yum remove -y "$pkg" ;;
+        sudo yum remove -y "$pkg"
       else
         echo "$pkg is not installed."
       fi
       ;;
     pacman)
       if pacman -Qi "$pkg" &> /dev/null; then
-        sudo pacman -R --noconfirm "$pkg" ;;
+        sudo pacman -R --noconfirm "$pkg"
       else
         echo "$pkg is not installed."
       fi
