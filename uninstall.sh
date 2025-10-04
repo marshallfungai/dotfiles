@@ -17,7 +17,7 @@ uninstall_packages() {
     echo "Uninstalling packages..."
     uninstall_pkg bash
     uninstall_pkg tmux
-    uninstall_pkg neovim
+    uninstall_pkg nvim
 }
 
 # Main execution
