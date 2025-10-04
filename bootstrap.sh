@@ -17,7 +17,8 @@ fi
 read -p "Add Stow symlinks (bash, nvim, tmux)? (y/n): " add_symlinks
 if [ "$add_symlinks" == "y" ]; then
     # Can be run multiple times to update configs
-   stow bash nvim tmux  # Symlink configs to $HOME
+   stow bash tmux  # Symlink configs to $HOME
+   stow --target=$HOME/.config nvim
 fi
 
 
