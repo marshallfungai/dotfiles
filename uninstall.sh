@@ -1,51 +1,82 @@
 #!/bin/bash
+# Dotfiles uninstall script
 
-set -euo pipefail  # Strict error handling
+set -euo pipefail
 
-# Source the system utilities
-source utils/dotfiles_utils.sh
+echo "⚠️  WARNING: This script removes dotfile symlinks and optionally uninstalls packages."
+echo ""
 
+# Resolve script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UTILS_PATH="$SCRIPT_DIR/utils/dotfiles_utils.sh"
+
+if [[ ! -f "$UTILS_PATH" ]]; then
+  echo "Error: Could not find utilities at $UTILS_PATH" >&2
+  exit 1
+fi
+
+source "$UTILS_PATH"
+
+# -------------------------------
+# Functions
+# -------------------------------
 
 remove_symlinks() {
-    echo "Removing symlinks..."
-    stow -D -t ~ bash     # Remove bash symlinks
-    stow -D -t ~ tmux     # Remove tmux symlinks
-    stow -D -t ~ neovim   # Remove neovim symlinks
+    echo "🔗 Removing symlinks..."
+    cd "$SCRIPT_DIR"
+
+    stow -D --no-folding -t ~ bash
+    stow -D --no-folding -t ~ tmux
+    stow -D --no-folding -t "$HOME/.config" nvim
+
+    echo "✅ Symlinks removed."
 }
 
 uninstall_packages() {
-    echo "Uninstalling packages..."
-    uninstall_pkg bash
+    echo "📦 Uninstalling optional packages..."
+    # Never uninstall bash — it's critical!
     uninstall_pkg tmux
-    uninstall_pkg nvim
+    uninstall_pkg neovim
+    uninstall_pkg stow
+    uninstall_pkg bind9-dnsutils  # Optional: only if no longer needed
+    echo "✅ Packages uninstalled."
 }
 
-# Main execution
+# -------------------------------
+# Main Execution
+# -------------------------------
+
 echo "This script will:"
-echo "1. Remove symlinks for bash, tmux, and neovim."
-echo "2. Optionally uninstall packages (bash, tmux, neovim)."
-read -p "Continue? (y/n): " confirm
-if [ "$confirm" != "y" ]; then
-    echo "Aborted."
-    exit 0
-fi
+echo "  1. Remove symlinks created by 'stow' for:"
+echo "     - bash (~/.bashrc, etc.)"
+echo "     - tmux (~/.tmux.conf)"
+echo "     - nvim (~/.config/nvim -> symlink)"
+echo ""
+echo "  2. Optionally uninstall packages: tmux, neovim, stow, bind9-dnsutils"
+echo ""
+echo "💡 Note: Core tools like 'bash' will NOT be uninstalled."
+read -p "Continue with uninstall process? (y/N): " confirm
+[[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
 
-read -p "Remove Stow symlinks? (y/n): " symlink_response
-if [ "$symlink_response" == "y" ]; then
+echo ""
+
+# Remove symlinks?
+read -p "Remove Stow symlinks? (y/N): " symlink_response
+if [[ "$symlink_response" =~ ^[Yy]$ ]]; then
     remove_symlinks
-    echo "Symlinks removed."
 else
-    echo "Symlinks not removed."
+    echo "⏭️  Skipping symlink removal."
 fi
 
-read -p "Uninstall packages? (y/n): " uninstall_response
-if [ "$uninstall_response" == "y" ]; then
+echo ""
+
+# Uninstall packages?
+read -p "Uninstall packages (tmux, neovim, stow, dnsutils)? (y/N): " pkg_response
+if [[ "$pkg_response" =~ ^[Yy]$ ]]; then
     uninstall_packages
-    echo "Packages uninstalled."
 else
-    echo "Packages not uninstalled."
+    echo "⏭️  Skipping package uninstallation."
 fi
 
-echo "Uninstall complete."
-
-
+echo ""
+echo "🎉 Uninstall complete!"
