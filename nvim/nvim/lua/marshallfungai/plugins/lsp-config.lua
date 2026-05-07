@@ -129,7 +129,8 @@ return {
             require('mason-lspconfig').setup {
                 -- explicitly set to an empty table (populates installs via mason-tool-installer)
                 ensure_installed = {},
-                automatic_installation = true,
+                -- Neovim 0.10 does not provide vim.lsp.enable; disable this feature for compatibility.
+                automatic_enable = false,
                 handlers = {
                     function(server_name)
                         local server = servers[server_name] or {}
@@ -163,16 +164,25 @@ return {
                         vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
                     end
 
+                    -- Prefer Telescope for richer UX, fallback to built-in LSP when unavailable.
+                    local has_telescope, telescope_builtin = pcall(require, 'telescope.builtin')
+                    local goto_def = has_telescope and telescope_builtin.lsp_definitions or vim.lsp.buf.definition
+                    local goto_impl = has_telescope and telescope_builtin.lsp_implementations or vim.lsp.buf.implementation
+                    local goto_type = has_telescope and telescope_builtin.lsp_type_definitions or vim.lsp.buf.type_definition
+                    local goto_refs = has_telescope and telescope_builtin.lsp_references or vim.lsp.buf.references
+
                     -- Navigation
-                    map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+                    map('gd', goto_def, '[G]oto [D]efinition')
                     map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-                    map('gi', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-                    map('gt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype definition')
-                    map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+                    map('gi', goto_impl, '[G]oto [I]mplementation')
+                    map('gt', goto_type, '[G]oto [T]ype definition')
+                    map('gr', goto_refs, '[G]oto [R]eferences')
 
                     -- Workspace
-                    map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-                    map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+                    map('<leader>ws', has_telescope and telescope_builtin.lsp_dynamic_workspace_symbols or vim.lsp.buf.workspace_symbol,
+                        '[W]orkspace [S]ymbols')
+                    map('<leader>ds', has_telescope and telescope_builtin.lsp_document_symbols or vim.lsp.buf.document_symbol,
+                        '[D]ocument [S]ymbols')
 
                     -- Code actions
                     map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'v' })

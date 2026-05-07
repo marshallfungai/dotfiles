@@ -82,7 +82,8 @@ build_prompt() {
   fi
 
   if [ "${color_prompt:-}" = yes ]; then
-    PS1="${debian_chroot:+($debian_chroot)}\[\033[38;5;81m\]${icon_os} ${env_tag}\[\033[0m\] \[\033[38;5;114m\]${icon_user} ${user_host}\[\033[0m\] \[\033[38;5;110m\]${icon_dir} ${cwd}\[\033[0m\]\[\033[38;5;221m\]${git_branch}\[\033[0m\]${status_tag}\n\[\033[38;5;141m\]${icon_ok}\[\033[0m\] ${prompt_char} "
+    # Use brighter 256-color values to improve readability on dark backgrounds.
+    PS1="${debian_chroot:+($debian_chroot)}\[\033[38;5;117m\]${icon_os} ${env_tag}\[\033[0m\] \[\033[38;5;157m\]${icon_user} ${user_host}\[\033[0m\] \[\033[38;5;159m\]${icon_dir} ${cwd}\[\033[0m\]\[\033[38;5;229m\]${git_branch}\[\033[0m\]${status_tag}\n\[\033[38;5;183m\]${icon_ok}\[\033[0m\] ${prompt_char} "
   else
     PS1="${debian_chroot:+($debian_chroot)}${icon_os} ${env_tag} ${icon_user} ${user_host} ${icon_dir} ${cwd}${git_branch}${status_tag}\n${icon_ok} ${prompt_char} "
   fi

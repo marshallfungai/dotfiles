@@ -3,10 +3,13 @@
 --
 --
 
+local has_nvim_011 = vim.fn.has 'nvim-0.11' == 1
+
 return  {
     -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
+    enabled = has_nvim_011,
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions

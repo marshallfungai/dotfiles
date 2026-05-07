@@ -1,5 +1,7 @@
 -- Core plugins aligned with kickstart.nvim structure
 
+local has_nvim_011 = vim.fn.has 'nvim-0.11' == 1
+
 return {
   'NMAC427/guess-indent.nvim',
 
@@ -52,6 +54,7 @@ return {
   {
     'folke/lazydev.nvim',
     ft = 'lua',
+    enabled = has_nvim_011,
     opts = {
       library = {
         { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
@@ -90,7 +93,7 @@ return {
       appearance = { nerd_font_variant = 'mono' },
       completion = { documentation = { auto_show = false, auto_show_delay_ms = 500 } },
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = has_nvim_011 and { 'lsp', 'path', 'snippets', 'lazydev' } or { 'lsp', 'path', 'snippets' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         },
