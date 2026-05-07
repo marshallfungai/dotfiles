@@ -106,6 +106,7 @@ install_tool() {
 
 install_tools_for_mode() {
   local -a tools=()
+  local -a failed_tools=()
   case "$MODE" in
     workstation)
       tools=(stow git curl unzip neovim tmux ripgrep fd fzf awscli terraform build-essential)
@@ -126,8 +127,22 @@ install_tools_for_mode() {
 
   echo "Installing required tools for mode: $MODE"
   for tool in "${tools[@]}"; do
-    install_tool "$tool"
+    if ! install_tool "$tool"; then
+      failed_tools+=("$tool")
+      echo "Warning: failed to install '$tool', continuing..."
+    fi
   done
+
+  if [[ "${#failed_tools[@]}" -gt 0 ]]; then
+    echo ""
+    echo "Tool installation summary: failures detected"
+    for tool in "${failed_tools[@]}"; do
+      echo "  - $tool"
+    done
+    echo ""
+    echo "Fix failed packages, then re-run bootstrap."
+    return 1
+  fi
 }
 
 stow_home_packages() {
