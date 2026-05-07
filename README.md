@@ -92,16 +92,22 @@ Use the bootstrap scripts as the default entrypoint. They call `stow` for you an
 ./bootstrap.sh wsl
 ```
 
+If a target file already exists (for example `~/.bashrc`), bootstrap will back it up automatically to:
+
+```bash
+~/.dotfiles-backup/<timestamp>/
+```
+
 ### Stage 2 (advanced/manual): direct stow commands
 
 Use direct `stow` only if you want manual control.
 
 ```bash
 # Home-targeted packages
-stow --restow --no-folding -t ~ base tmux dev
+stow --dir="$PWD" --no-folding -t ~ base tmux dev
 
 # Nvim goes to ~/.config
-stow --restow --no-folding -t ~/.config nvim
+stow --dir="$PWD" --no-folding -t ~/.config nvim
 ```
 
 ## Package Purpose

@@ -4,11 +4,10 @@
 set -euo pipefail
 
 MODE="${1:-workstation}"
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if ! command -v stow &> /dev/null; then
-  echo "❌ Error: stow is not installed or not in PATH." >&2
+  echo "Error: stow is not installed or not in PATH." >&2
   echo "Install it first, then re-run bootstrap." >&2
   exit 1
 fi
@@ -31,19 +30,47 @@ fi
 mkdir -p "$HOME/.config"
 cd "$SCRIPT_DIR"
 
+BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
+
+backup_if_conflict() {
+  local target="$1"
+  if [[ -e "$target" && ! -L "$target" ]]; then
+    mkdir -p "$BACKUP_DIR"
+    local base_name
+    base_name="$(basename "$target")"
+    local backup_target="$BACKUP_DIR/$base_name"
+    echo "Existing conflict at $target"
+    echo "Backing up to $backup_target"
+    mv "$target" "$backup_target"
+  fi
+}
+
+prepare_common_conflicts() {
+  backup_if_conflict "$HOME/.bashrc"
+  backup_if_conflict "$HOME/.bash_aliases"
+  backup_if_conflict "$HOME/.bash_security"
+  backup_if_conflict "$HOME/.bash_dev"
+  backup_if_conflict "$HOME/.bash_aws"
+  backup_if_conflict "$HOME/.bash_server"
+  backup_if_conflict "$HOME/.bash_wsl"
+  backup_if_conflict "$HOME/.tmux.conf"
+  backup_if_conflict "$HOME/.config/nvim"
+}
+
 stow_home_packages() {
   if [[ "$#" -gt 0 ]]; then
-    stow --restow --no-folding --target="$HOME" "$@"
+    stow --dir="$SCRIPT_DIR" --no-folding --target="$HOME" "$@"
   fi
 }
 
 stow_config_packages() {
   if [[ "$#" -gt 0 ]]; then
-    stow --restow --no-folding --target="$HOME/.config" "$@"
+    stow --dir="$SCRIPT_DIR" --no-folding --target="$HOME/.config" "$@"
   fi
 }
 
-echo "🚀 Bootstrapping mode: $MODE"
+echo "Bootstrapping mode: $MODE"
+prepare_common_conflicts
 
 case "$MODE" in
   workstation)
@@ -91,4 +118,8 @@ EOF
     ;;
 esac
 
-echo "✅ Bootstrap complete for mode: $MODE"
+if [[ -d "$BACKUP_DIR" ]]; then
+  echo "Backups saved in: $BACKUP_DIR"
+fi
+
+echo "Bootstrap complete for mode: $MODE"
