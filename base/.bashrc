@@ -24,11 +24,49 @@ case "$TERM" in
   xterm-color|*-256color) color_prompt=yes ;;
 esac
 
-if [ "${color_prompt:-}" = yes ]; then
-  PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\\$ '
-else
-  PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
+PROMPT_DIRTRIM=3
+
+git_prompt_branch() {
+  command -v git >/dev/null 2>&1 || return 0
+  local branch
+  branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)" || return 0
+  [ -n "$branch" ] && printf " [%s]" "$branch"
+}
+
+build_prompt() {
+  local exit_code="$?"
+  local user_host cwd git_branch env_tag prompt_char status_tag
+
+  user_host="\u@\h"
+  cwd="\w"
+  git_branch="$(git_prompt_branch)"
+
+  if grep -qi microsoft /proc/version 2>/dev/null; then
+    env_tag="WSL"
+  else
+    env_tag="LINUX"
+  fi
+
+  if [ "$EUID" -eq 0 ]; then
+    prompt_char="#"
+  else
+    prompt_char="$"
+  fi
+
+  if [ "$exit_code" -ne 0 ]; then
+    status_tag=" \[\033[1;31m\]x${exit_code}\[\033[0m\]"
+  else
+    status_tag=""
+  fi
+
+  if [ "${color_prompt:-}" = yes ]; then
+    PS1="${debian_chroot:+($debian_chroot)}\[\033[1;36m\][${env_tag}]\[\033[0m\] \[\033[1;32m\]${user_host}\[\033[0m\] \[\033[1;34m\]${cwd}\[\033[0m\]\[\033[0;33m\]${git_branch}\[\033[0m\]${status_tag}\n\[\033[1;35m\]${prompt_char}\[\033[0m\] "
+  else
+    PS1="${debian_chroot:+($debian_chroot)}[${env_tag}] ${user_host} ${cwd}${git_branch}${status_tag}\n${prompt_char} "
+  fi
+}
+
+PROMPT_COMMAND=build_prompt
 unset color_prompt
 
 case "$TERM" in
