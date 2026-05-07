@@ -20,9 +20,9 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
   debian_chroot="$(cat /etc/debian_chroot)"
 fi
 
-case "$TERM" in
-  xterm-color|*-256color) color_prompt=yes ;;
-esac
+if command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
+  color_prompt=yes
+fi
 
 PROMPT_DIRTRIM=3
 
@@ -36,10 +36,28 @@ git_prompt_branch() {
 build_prompt() {
   local exit_code="$?"
   local user_host cwd git_branch env_tag prompt_char status_tag
+  local use_icons icon_os icon_user icon_dir icon_git icon_ok icon_err
 
   user_host="\u@\h"
   cwd="\w"
   git_branch="$(git_prompt_branch)"
+  use_icons="${DOTFILES_PROMPT_ICONS:-1}"
+
+  if [ "$use_icons" = "1" ]; then
+    icon_os="●"
+    icon_user=""
+    icon_dir=""
+    icon_git=""
+    icon_ok="❯"
+    icon_err="✗"
+  else
+    icon_os="OS"
+    icon_user="USER"
+    icon_dir="DIR"
+    icon_git="GIT"
+    icon_ok=">"
+    icon_err="x"
+  fi
 
   if grep -qi microsoft /proc/version 2>/dev/null; then
     env_tag="WSL"
@@ -54,24 +72,30 @@ build_prompt() {
   fi
 
   if [ "$exit_code" -ne 0 ]; then
-    status_tag=" \[\033[1;31m\]x${exit_code}\[\033[0m\]"
+    status_tag=" \[\033[1;31m\]${icon_err}${exit_code}\[\033[0m\]"
   else
     status_tag=""
   fi
 
+  if [ -n "$git_branch" ]; then
+    git_branch=" ${icon_git}${git_branch}"
+  fi
+
   if [ "${color_prompt:-}" = yes ]; then
-    PS1="${debian_chroot:+($debian_chroot)}\[\033[1;36m\][${env_tag}]\[\033[0m\] \[\033[1;32m\]${user_host}\[\033[0m\] \[\033[1;34m\]${cwd}\[\033[0m\]\[\033[0;33m\]${git_branch}\[\033[0m\]${status_tag}\n\[\033[1;35m\]${prompt_char}\[\033[0m\] "
+    PS1="${debian_chroot:+($debian_chroot)}\[\033[38;5;81m\]${icon_os} ${env_tag}\[\033[0m\] \[\033[38;5;114m\]${icon_user} ${user_host}\[\033[0m\] \[\033[38;5;110m\]${icon_dir} ${cwd}\[\033[0m\]\[\033[38;5;221m\]${git_branch}\[\033[0m\]${status_tag}\n\[\033[38;5;141m\]${icon_ok}\[\033[0m\] ${prompt_char} "
   else
-    PS1="${debian_chroot:+($debian_chroot)}[${env_tag}] ${user_host} ${cwd}${git_branch}${status_tag}\n${prompt_char} "
+    PS1="${debian_chroot:+($debian_chroot)}${icon_os} ${env_tag} ${icon_user} ${user_host} ${icon_dir} ${cwd}${git_branch}${status_tag}\n${icon_ok} ${prompt_char} "
   fi
 }
 
-PROMPT_COMMAND=build_prompt
-unset color_prompt
+set_terminal_title() {
+  case "$TERM" in
+    xterm*|rxvt*|screen*|tmux*) printf '\033]0;%s@%s: %s\007' "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/\~}" ;;
+  esac
+}
 
-case "$TERM" in
-  xterm*|rxvt*) PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1" ;;
-esac
+PROMPT_COMMAND="set_terminal_title;build_prompt"
+unset color_prompt
 
 # Common tracked aliases/functions
 [ -f "$HOME/.bash_aliases" ] && . "$HOME/.bash_aliases"
