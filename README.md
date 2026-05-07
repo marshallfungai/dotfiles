@@ -10,42 +10,16 @@ Neovim config is based on [kickstart.nvim](https://github.com/nvim-lua/kickstart
 
 ## Prerequisite
 
-Install GNU Stow first. The bootstrap and uninstall scripts require it.
+Bootstrap installs required tools for the selected mode automatically.
 
-```bash
-stow --version
-```
-
-If this command fails, install `stow` with your package manager, then continue.
-
-### Install Stow by OS
-
-```bash
-# Ubuntu / Debian (including most WSL distros)
-sudo apt update && sudo apt install -y stow
-
-# Fedora
-sudo dnf install -y stow
-
-# RHEL / CentOS
-sudo yum install -y stow
-
-# Arch Linux
-sudo pacman -S --noconfirm stow
-
-# macOS (Homebrew)
-brew install stow
-
-# openSUSE
-sudo zypper install -y stow
-```
+You only need:
+- a supported package manager (`apt`, `yum`, `pacman`, or `brew`)
+- `sudo` access
 
 ### Setup Stage Order
 
 1. Clone repo
-2. Install `stow`
-3. Verify `stow --version`
-4. Run `./bootstrap.sh <mode>`
+2. Run `./bootstrap.sh <mode>`
 
 ## Stow Modes
 
@@ -54,6 +28,20 @@ The setup uses composable Stow packages, wrapped in mode commands.
 - `workstation = base nvim tmux dev`
 - `server = base server tmux`
 - `wsl = base wsl nvim tmux`
+
+### Mandatory Tool Installation by Mode
+
+`bootstrap.sh` installs tools first, then applies stow links.
+
+- `workstation`: `stow git curl unzip neovim tmux ripgrep fd/fd-find fzf awscli terraform build-essential`
+- `server`: `stow git curl neovim tmux ripgrep build-essential`
+- `wsl`: `stow git curl unzip neovim tmux ripgrep fd/fd-find fzf awscli terraform build-essential`
+
+`build-essential` is mapped per package manager:
+- `apt`: `build-essential`
+- `yum`: `gcc gcc-c++ make`
+- `pacman`: `base-devel`
+- `brew`: `make gcc`
 
 ### Bootstrap by mode
 
@@ -100,7 +88,7 @@ If a target file already exists (for example `~/.bashrc`), bootstrap will back i
 
 ### Stage 2 (advanced/manual): direct stow commands
 
-Use direct `stow` only if you want manual control.
+Use direct `stow` only if you want manual control after bootstrap has installed required tools.
 
 ```bash
 # Home-targeted packages

@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Dotfiles bootstrap script (mode-driven, idempotent)
+# Dotfiles bootstrap script (mode-driven, installs tools + stows configs)
 
 set -euo pipefail
 
 MODE="${1:-workstation}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UTILS_PATH="$SCRIPT_DIR/utils/dotfiles_utils.sh"
 
-if ! command -v stow &> /dev/null; then
-  echo "Error: stow is not installed or not in PATH." >&2
-  echo "Install it first, then re-run bootstrap." >&2
+if [[ ! -f "$UTILS_PATH" ]]; then
+  echo "Error: missing utilities at $UTILS_PATH" >&2
   exit 1
 fi
+source "$UTILS_PATH"
 
 if [[ "$MODE" == "-h" || "$MODE" == "--help" ]]; then
   cat <<'EOF'
@@ -36,9 +37,7 @@ backup_if_conflict() {
   local target="$1"
   if [[ -e "$target" && ! -L "$target" ]]; then
     mkdir -p "$BACKUP_DIR"
-    local base_name
-    base_name="$(basename "$target")"
-    local backup_target="$BACKUP_DIR/$base_name"
+    local backup_target="$BACKUP_DIR/$(basename "$target")"
     echo "Existing conflict at $target"
     echo "Backing up to $backup_target"
     mv "$target" "$backup_target"
@@ -57,6 +56,80 @@ prepare_common_conflicts() {
   backup_if_conflict "$HOME/.config/nvim"
 }
 
+install_tool() {
+  local tool="$1"
+  IFS=':' read -r os_type pkg_manager <<< "$(get_pkg_manager)"
+
+  case "$tool" in
+    stow|git|tmux|neovim|curl|unzip|fzf|terraform|awscli)
+      install_pkg "$tool"
+      ;;
+    ripgrep)
+      install_pkg "ripgrep"
+      ;;
+    fd)
+      if [[ "$pkg_manager" == "apt" ]]; then
+        install_pkg "fd-find"
+      else
+        install_pkg "fd"
+      fi
+      ;;
+    build-essential)
+      case "$pkg_manager" in
+        apt)
+          install_pkg "build-essential"
+          ;;
+        yum)
+          install_pkg "gcc"
+          install_pkg "gcc-c++"
+          install_pkg "make"
+          ;;
+        pacman)
+          install_pkg "base-devel"
+          ;;
+        brew)
+          install_pkg "make"
+          install_pkg "gcc"
+          ;;
+        *)
+          echo "Error: unsupported package manager for build-essential mapping ($pkg_manager)" >&2
+          return 1
+          ;;
+      esac
+      ;;
+    *)
+      echo "Error: unsupported tool mapping '$tool'" >&2
+      return 1
+      ;;
+  esac
+}
+
+install_tools_for_mode() {
+  local -a tools=()
+  case "$MODE" in
+    workstation)
+      tools=(stow git curl unzip neovim tmux ripgrep fd fzf awscli terraform build-essential)
+      ;;
+    server)
+      tools=(stow git curl neovim tmux ripgrep build-essential)
+      ;;
+    wsl)
+      tools=(stow git curl unzip neovim tmux ripgrep fd fzf awscli terraform build-essential)
+      ;;
+    custom)
+      tools=(stow git curl neovim tmux build-essential)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  echo "Installing required tools for mode: $MODE"
+  for tool in "${tools[@]}"; do
+    install_tool "$tool"
+  done
+}
+
 stow_home_packages() {
   if [[ "$#" -gt 0 ]]; then
     stow --dir="$SCRIPT_DIR" --no-folding --target="$HOME" "$@"
@@ -70,6 +143,7 @@ stow_config_packages() {
 }
 
 echo "Bootstrapping mode: $MODE"
+install_tools_for_mode
 prepare_common_conflicts
 
 case "$MODE" in
@@ -90,7 +164,6 @@ case "$MODE" in
       echo "Usage: ./bootstrap.sh custom <stow-package> [more-packages...]" >&2
       exit 1
     fi
-
     home_pkgs=()
     config_pkgs=()
     for pkg in "$@"; do
@@ -100,7 +173,6 @@ case "$MODE" in
         home_pkgs+=("$pkg")
       fi
     done
-
     stow_home_packages "${home_pkgs[@]}"
     stow_config_packages "${config_pkgs[@]}"
     ;;
