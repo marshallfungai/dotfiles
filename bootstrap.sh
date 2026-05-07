@@ -1,52 +1,94 @@
 #!/usr/bin/env bash
-# Dotfiles bootstrap script (run once)
+# Dotfiles bootstrap script (mode-driven, idempotent)
 
 set -euo pipefail
 
-echo "🚀 Starting dotfiles bootstrap..."
+MODE="${1:-workstation}"
 
-# Resolve script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-UTILS_PATH="$SCRIPT_DIR/utils/dotfiles_utils.sh"
 
-if [[ ! -f "$UTILS_PATH" ]]; then
-  echo "Error: Could not find utilities at $UTILS_PATH" >&2
+if ! command -v stow &> /dev/null; then
+  echo "❌ Error: stow is not installed or not in PATH." >&2
+  echo "Install it first, then re-run bootstrap." >&2
   exit 1
 fi
 
-source "$UTILS_PATH"
+if [[ "$MODE" == "-h" || "$MODE" == "--help" ]]; then
+  cat <<'EOF'
+Usage:
+  ./bootstrap.sh <mode>
+  ./bootstrap.sh custom <stow-package> [more-packages...]
 
-# Ensure config dir exists
+Modes:
+  workstation
+  server
+  wsl
+  custom
+EOF
+  exit 0
+fi
+
 mkdir -p "$HOME/.config"
+cd "$SCRIPT_DIR"
 
-# --- Package Installation ---
-read -p "Install packages (bind9-dnsutils, stow, tmux, neovim)? (y/n): " install_packages
-if [[ "$install_packages" =~ ^[Yy]$ ]]; then
-  echo "📦 Installing required packages..."
-  install_pkg bind9-dnsutils
-  install_pkg stow
-  install_pkg tmux
-  install_pkg neovim
-else
-  echo "Skipping package installation."
-fi
-
-# --- Create Symlinks ---
-read -p "Add Stow symlinks (bash, nvim, tmux)? (y/n): " add_symlinks
-if [[ "$add_symlinks" =~ ^[Yy]$ ]]; then
-  if ! command -v stow &> /dev/null; then
-    echo "❌ Error: 'stow' is not installed or not in PATH." >&2
-    echo "Please install stow or enable package installation." >&2
-    exit 1
+stow_home_packages() {
+  if [[ "$#" -gt 0 ]]; then
+    stow --restow --no-folding --target="$HOME" "$@"
   fi
+}
 
-  echo "🔗 Creating symlinks..."
-  cd "$SCRIPT_DIR"  # Ensure we're in dotfiles root
+stow_config_packages() {
+  if [[ "$#" -gt 0 ]]; then
+    stow --restow --no-folding --target="$HOME/.config" "$@"
+  fi
+}
 
-  stow --no-folding bash tmux
-  stow --no-folding --target="$HOME/.config" nvim
+echo "🚀 Bootstrapping mode: $MODE"
 
-  echo "✅ Symlinks created!"
-fi
+case "$MODE" in
+  workstation)
+    stow_home_packages base tmux dev
+    stow_config_packages nvim
+    ;;
+  server)
+    stow_home_packages base server tmux
+    ;;
+  wsl)
+    stow_home_packages base wsl tmux
+    stow_config_packages nvim
+    ;;
+  custom)
+    shift || true
+    if [[ "$#" -eq 0 ]]; then
+      echo "Usage: ./bootstrap.sh custom <stow-package> [more-packages...]" >&2
+      exit 1
+    fi
 
-echo "🎉 Bootstrap complete!"
+    home_pkgs=()
+    config_pkgs=()
+    for pkg in "$@"; do
+      if [[ "$pkg" == "nvim" ]]; then
+        config_pkgs+=("$pkg")
+      else
+        home_pkgs+=("$pkg")
+      fi
+    done
+
+    stow_home_packages "${home_pkgs[@]}"
+    stow_config_packages "${config_pkgs[@]}"
+    ;;
+  *)
+    cat >&2 <<'EOF'
+Unknown mode.
+
+Valid modes:
+  workstation
+  server
+  wsl
+  custom <packages...>
+EOF
+    exit 1
+    ;;
+esac
+
+echo "✅ Bootstrap complete for mode: $MODE"

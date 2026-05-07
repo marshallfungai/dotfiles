@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Lightweight security defaults for interactive shells.
+umask 027
+set -o noclobber
+
+# Optional security helpers
+alias fw_status='sudo ufw status'
+alias fw_enable='sudo ufw enable'
+alias fw_disable='sudo ufw disable'
+alias fw_allow='sudo ufw allow'
+alias fw_deny='sudo ufw deny'
+alias scan_ports='nmap -sV -T4'
+alias list_suspicious='ps aux | grep -E "(crypt|miner|backdoor|malware)"'

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# WSL2 interop helpers
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  case ":$PATH:" in
+    *":/mnt/c/Windows/System32/OpenSSH:"*) ;;
+    *) export PATH="$PATH:/mnt/c/Windows/System32/OpenSSH" ;;
+  esac
+
+  alias ssh="ssh.exe"
+  alias scp="scp.exe"
+  alias ssh-add="ssh-add.exe"
+
+  wssh() {
+    ssh.exe -F /dev/null -A "$@"
+  }
+
+  wscp() {
+    local win_paths=()
+    for arg in "$@"; do
+      if [[ "$arg" == *:* ]] || [[ "$arg" == /mnt/* ]]; then
+        win_paths+=("$arg")
+      elif [[ -e "$arg" ]]; then
+        win_paths+=("$(wslpath -w "$arg" | sed 's/\\/\\\\/g')")
+      else
+        win_paths+=("$arg")
+      fi
+    done
+    scp.exe -F /dev/null "${win_paths[@]}"
+  }
+fi

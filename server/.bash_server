@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Server-safe shell defaults (lean and predictable)
+export EDITOR="${EDITOR:-nvim}"
+export VISUAL="${VISUAL:-nvim}"
+
+alias v='nvim'
+alias ta='tmux attach -t'
+alias tls='tmux ls'
+alias dfh='df -h'
+alias duh='du -sh ./* 2>/dev/null'

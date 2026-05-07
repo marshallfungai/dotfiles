@@ -1,7 +1,17 @@
-# MARSHALLL FUNGAI#
-### Credit : kickstart.nvim 
+# Neovim Config
 
-## Note
+Customized Neovim setup based on `kickstart.nvim`.
 
-Customized version of kickstarter.nvim
-I should mention that 'lua/theWire/" is the custom neovim folder.
+## Structure
+
+- `init.lua`: entrypoint
+- `lua/kickstart/`: upstream-inspired modules
+- `lua/marshallfungai/`: personal modules and plugins
+
+## Local-Only Overrides
+
+`init.lua` safely tries to load:
+
+- `lua/marshallfungai/local.lua`
+
+Use that file for machine-specific settings you do not want in git.

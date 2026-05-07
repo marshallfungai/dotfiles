@@ -1,82 +1,93 @@
-#!/bin/bash
-# Dotfiles uninstall script
+#!/usr/bin/env bash
+# Dotfiles uninstall script (mode-driven, non-destructive by default)
 
 set -euo pipefail
 
-echo "⚠️  WARNING: This script removes dotfile symlinks and optionally uninstalls packages."
-echo ""
+MODE="${1:-workstation}"
 
-# Resolve script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-UTILS_PATH="$SCRIPT_DIR/utils/dotfiles_utils.sh"
+cd "$SCRIPT_DIR"
 
-if [[ ! -f "$UTILS_PATH" ]]; then
-  echo "Error: Could not find utilities at $UTILS_PATH" >&2
+if ! command -v stow &> /dev/null; then
+  echo "❌ Error: stow is not installed or not in PATH." >&2
   exit 1
 fi
 
-source "$UTILS_PATH"
+if [[ "$MODE" == "-h" || "$MODE" == "--help" ]]; then
+  cat <<'EOF'
+Usage:
+  ./uninstall.sh <mode>
+  ./uninstall.sh custom <stow-package> [more-packages...]
 
-# -------------------------------
-# Functions
-# -------------------------------
+Modes:
+  workstation
+  server
+  wsl
+  custom
+EOF
+  exit 0
+fi
 
-remove_symlinks() {
-    echo "🔗 Removing symlinks..."
-    cd "$SCRIPT_DIR"
-
-    stow -D --no-folding -t ~ bash
-    stow -D --no-folding -t ~ tmux
-    stow -D --no-folding -t "$HOME/.config" nvim
-
-    echo "✅ Symlinks removed."
+unstow_home_packages() {
+  if [[ "$#" -gt 0 ]]; then
+    stow -D --no-folding --target="$HOME" "$@"
+  fi
 }
 
-uninstall_packages() {
-    echo "📦 Uninstalling optional packages..."
-    # Never uninstall bash — it's critical!
-    uninstall_pkg tmux
-    uninstall_pkg neovim
-    uninstall_pkg stow
-    uninstall_pkg bind9-dnsutils  # Optional: only if no longer needed
-    echo "✅ Packages uninstalled."
+unstow_config_packages() {
+  if [[ "$#" -gt 0 ]]; then
+    stow -D --no-folding --target="$HOME/.config" "$@"
+  fi
 }
 
-# -------------------------------
-# Main Execution
-# -------------------------------
-
-echo "This script will:"
-echo "  1. Remove symlinks created by 'stow' for:"
-echo "     - bash (~/.bashrc, etc.)"
-echo "     - tmux (~/.tmux.conf)"
-echo "     - nvim (~/.config/nvim -> symlink)"
-echo ""
-echo "  2. Optionally uninstall packages: tmux, neovim, stow, bind9-dnsutils"
-echo ""
-echo "💡 Note: Core tools like 'bash' will NOT be uninstalled."
-read -p "Continue with uninstall process? (y/N): " confirm
+echo "⚠️  This will remove symlinks for mode: $MODE"
+read -r -p "Continue? (y/N): " confirm
 [[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
 
-echo ""
+case "$MODE" in
+  workstation)
+    unstow_home_packages base tmux dev
+    unstow_config_packages nvim
+    ;;
+  server)
+    unstow_home_packages base server tmux
+    ;;
+  wsl)
+    unstow_home_packages base wsl tmux
+    unstow_config_packages nvim
+    ;;
+  custom)
+    shift || true
+    if [[ "$#" -eq 0 ]]; then
+      echo "Usage: ./uninstall.sh custom <stow-package> [more-packages...]" >&2
+      exit 1
+    fi
 
-# Remove symlinks?
-read -p "Remove Stow symlinks? (y/N): " symlink_response
-if [[ "$symlink_response" =~ ^[Yy]$ ]]; then
-    remove_symlinks
-else
-    echo "⏭️  Skipping symlink removal."
-fi
+    home_pkgs=()
+    config_pkgs=()
+    for pkg in "$@"; do
+      if [[ "$pkg" == "nvim" ]]; then
+        config_pkgs+=("$pkg")
+      else
+        home_pkgs+=("$pkg")
+      fi
+    done
 
-echo ""
+    unstow_home_packages "${home_pkgs[@]}"
+    unstow_config_packages "${config_pkgs[@]}"
+    ;;
+  *)
+    cat >&2 <<'EOF'
+Unknown mode.
 
-# Uninstall packages?
-read -p "Uninstall packages (tmux, neovim, stow, dnsutils)? (y/N): " pkg_response
-if [[ "$pkg_response" =~ ^[Yy]$ ]]; then
-    uninstall_packages
-else
-    echo "⏭️  Skipping package uninstallation."
-fi
+Valid modes:
+  workstation
+  server
+  wsl
+  custom <packages...>
+EOF
+    exit 1
+    ;;
+esac
 
-echo ""
-echo "🎉 Uninstall complete!"
+echo "✅ Symlinks removed for mode: $MODE"

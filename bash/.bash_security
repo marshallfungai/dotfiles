@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-## tailscale
-alias ts='tailscale status' # Quick status check
-alias tsup='tailscale up'
-alias tsdown='tailscale down'
-alias tssh='tailscale ssh' # SSH to nodes using Tailscale
-alias tsip='tailscale ip'
-alias tsroutes='tailscale netcheck'

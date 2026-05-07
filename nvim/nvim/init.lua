@@ -9,6 +9,7 @@
 require 'marshallfungai.options'
 require 'marshallfungai.keymaps'
 require 'marshallfungai.autocmds'
+pcall(require, 'marshallfungai.local')
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -263,5 +264,5 @@ require('lazy').setup({
   },
 })
 
--- The line beneath this is callej `modeline`. See `:help modeline`
+-- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

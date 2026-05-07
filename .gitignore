@@ -2,9 +2,6 @@
 # Extensions where computer generated on the context of least access
 # In other words, anything I did not approve, does not go to the cloud
 
-# Custom files
-bash/.wsl-bakcup
-
 # General system files
 .DS_Store
 .AppleDouble
@@ -87,3 +84,20 @@ logs/
 .env
 .secret
 .config/*/private
+
+# Windows alternate data stream artifacts
+*.Zone.Identifier
+
+# Secrets and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.kubeconfig
+*.tfvars
+*.tfvars.json
+*.vault
+**/.aws/credentials
+**/.aws/config
+**/.kube/config
+**/.env.*

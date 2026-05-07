@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+alias aws-ls='aws s3 ls'
+alias aws-account='aws sts get-caller-identity --query Account --output text'
+alias aws-ec2='aws ec2 describe-instances --query "Reservations[].Instances[].{ID:InstanceId,State:State.Name,Name:Tags[?Key==`Name`].Value|[0],Type:InstanceType,IP:PrivateIpAddress}" --output table'
+alias aws-rds='aws rds describe-db-instances --query "DBInstances[].{ID:DBInstanceIdentifier,Status:DBInstanceStatus,Engine:Engine}" --output table'
+alias aws-cf='aws cloudformation describe-stacks --query "Stacks[].{Name:StackName,Status:StackStatus}" --output table'
+alias aws-profiles='aws configure list-profiles'
+
+aws-console() {
+  local account region url
+  account="$(aws sts get-caller-identity --query Account --output text 2>/dev/null)" || return 1
+  region="$(aws configure get region 2>/dev/null)"
+  region="${region:-us-east-1}"
+  url="https://${account}.signin.aws.amazon.com/console?region=${region}"
+
+  if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$url"
+  elif command -v open >/dev/null 2>&1; then
+    open "$url"
+  elif command -v explorer.exe >/dev/null 2>&1; then
+    explorer.exe "$url"
+  else
+    echo "$url"
+  fi
+}
+
+aws-region() {
+  if [ -z "${1:-}" ]; then
+    echo "Usage: aws-region <region>"
+    return 1
+  fi
+  export AWS_DEFAULT_REGION="$1"
+  echo "AWS_DEFAULT_REGION set to $1"
+}

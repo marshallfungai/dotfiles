@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Dev tooling shortcuts
+alias dps='docker ps'
+alias di='docker images'
+alias dc='docker compose'
+alias tf='terraform'
+alias k='kubectl'
+alias lg='lazygit'
+
+# Tailscale helpers
+alias ts='tailscale status'
+alias tsup='tailscale up'
+alias tsdown='tailscale down'
+alias tssh='tailscale ssh'
+alias tsip='tailscale ip'
+alias tsroutes='tailscale netcheck'
