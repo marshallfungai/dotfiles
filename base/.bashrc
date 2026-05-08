@@ -37,6 +37,7 @@ build_prompt() {
   local exit_code="$?"
   local user_host cwd git_branch env_tag prompt_char status_tag
   local use_icons icon_os icon_user icon_dir icon_git icon_ok icon_err
+  local c_env c_user c_dir c_git c_ok
 
   user_host="\u@\h"
   cwd="\w"
@@ -81,9 +82,23 @@ build_prompt() {
     git_branch=" ${icon_git}${git_branch}"
   fi
 
+  if [ "${DOTFILES_BASH_THEME:-dark}" = "light" ]; then
+    c_env='33'
+    c_user='24'
+    c_dir='19'
+    c_git='60'
+    c_ok='24'
+  else
+    c_env='110'
+    c_user='117'
+    c_dir='81'
+    c_git='153'
+    c_ok='117'
+  fi
+
   if [ "${color_prompt:-}" = yes ]; then
-    # Use brighter 256-color values to improve readability on dark backgrounds.
-    PS1="${debian_chroot:+($debian_chroot)}\[\033[38;5;117m\]${icon_os} ${env_tag}\[\033[0m\] \[\033[38;5;157m\]${icon_user} ${user_host}\[\033[0m\] \[\033[38;5;159m\]${icon_dir} ${cwd}\[\033[0m\]\[\033[38;5;229m\]${git_branch}\[\033[0m\]${status_tag}\n\[\033[38;5;183m\]${icon_ok}\[\033[0m\] ${prompt_char} "
+    # Palette switches with DOTFILES_BASH_THEME=dark|light.
+    PS1="${debian_chroot:+($debian_chroot)}\[\033[38;5;${c_env}m\]${icon_os} ${env_tag}\[\033[0m\] \[\033[38;5;${c_user}m\]${icon_user} ${user_host}\[\033[0m\] \[\033[1;38;5;${c_dir}m\]${icon_dir} ${cwd}\[\033[0m\]\[\033[38;5;${c_git}m\]${git_branch}\[\033[0m\]${status_tag}\n\[\033[38;5;${c_ok}m\]${icon_ok}\[\033[0m\] ${prompt_char} "
   else
     PS1="${debian_chroot:+($debian_chroot)}${icon_os} ${env_tag} ${icon_user} ${user_host} ${icon_dir} ${cwd}${git_branch}${status_tag}\n${icon_ok} ${prompt_char} "
   fi

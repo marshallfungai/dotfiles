@@ -95,4 +95,64 @@ if [ -x /usr/bin/dircolors ]; then
   alias egrep='egrep --color=auto'
 fi
 
+set_ls_colors() {
+  local theme="${1:-${DOTFILES_BASH_THEME:-dark}}"
+  case "$theme" in
+    light)
+      export LS_COLORS='di=1;34:ln=1;36:so=35:pi=33:ex=1;32:bd=1;34:cd=1;34:su=1;31:sg=1;31:tw=30;46:ow=30;47:st=30;43:*.tar=33:*.tgz=33:*.zip=33:*.gz=33:*.bz2=33:*.xz=33:*.7z=33:*.jpg=35:*.jpeg=35:*.png=35:*.gif=35:*.mp4=35:*.mkv=35:*.mp3=35:*.wav=35'
+      ;;
+    *)
+      export LS_COLORS='di=1;38;5;117:ln=38;5;81:so=38;5;214:pi=38;5;141:ex=1;38;5;150:bd=1;38;5;111:cd=1;38;5;111:su=1;38;5;203:sg=1;38;5;209:tw=30;48;5;117:ow=30;48;5;110:st=30;48;5;203:*.tar=38;5;180:*.tgz=38;5;180:*.zip=38;5;179:*.gz=38;5;179:*.bz2=38;5;179:*.xz=38;5;179:*.7z=38;5;179:*.jpg=38;5;183:*.jpeg=38;5;183:*.png=38;5;183:*.gif=38;5;183:*.mp4=38;5;177:*.mkv=38;5;177:*.mp3=38;5;177:*.wav=38;5;177'
+      ;;
+  esac
+}
+
+set_bash_theme() {
+  local theme="${1:-dark}"
+  case "$theme" in
+    dark|light) ;;
+    *)
+      echo "Usage: set_bash_theme [dark|light]"
+      return 1
+      ;;
+  esac
+
+  export DOTFILES_BASH_THEME="$theme"
+  set_ls_colors "$theme"
+
+  if [ -f "$HOME/.bash_local" ]; then
+    if grep -q '^export DOTFILES_BASH_THEME=' "$HOME/.bash_local"; then
+      sed -i "s/^export DOTFILES_BASH_THEME=.*/export DOTFILES_BASH_THEME=$theme/" "$HOME/.bash_local"
+    else
+      printf '\nexport DOTFILES_BASH_THEME=%s\n' "$theme" >> "$HOME/.bash_local"
+    fi
+  else
+    printf 'export DOTFILES_BASH_THEME=%s\n' "$theme" > "$HOME/.bash_local"
+  fi
+
+  build_prompt
+  echo "Bash theme set to: $theme"
+}
+
+# Apply current theme every shell startup.
+set_ls_colors "${DOTFILES_BASH_THEME:-dark}"
+
+alias theme-dark='set_bash_theme dark'
+alias theme-light='set_bash_theme light'
+alias theme-status='echo "DOTFILES_BASH_THEME=${DOTFILES_BASH_THEME:-dark}"'
+
+# lld: long listing for dirs only (same as ls -ld)
+alias lld='ls -ld --color=always'
+
+# llp: long listing with colored permission bits (first column)
+llp() {
+  ls -ld --color=always "$@" | sed -E \
+    -e 's/^([d])/\x1b[1;38;5;117m\1\x1b[0m/' \
+    -e 's/^([-])/\x1b[38;5;153m\1\x1b[0m/' \
+    -e 's/^([l])/\x1b[38;5;81m\1\x1b[0m/' \
+    -e 's/([r])/\x1b[38;5;150m\1\x1b[0m/g' \
+    -e 's/([w])/\x1b[38;5;179m\1\x1b[0m/g' \
+    -e 's/([xsStT])/\x1b[1;38;5;203m\1\x1b[0m/g'
+}
+
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
