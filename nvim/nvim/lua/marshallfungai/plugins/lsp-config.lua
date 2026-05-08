@@ -17,9 +17,39 @@ local servers = {
             },
         },
     },
+    pyright = {},
+    ruff = {},
     phpactor = {},
     ts_ls = {},
     bashls = {},
+    jsonls = {
+        settings = {
+            json = {
+                validate = { enable = true },
+                schemaDownload = { enable = true },
+                schemas = require('schemastore').json.schemas(),
+            },
+        },
+    },
+    terraformls = {},
+    dockerls = {},
+    docker_compose_language_service = {},
+    yamlls = {
+        settings = {
+            yaml = {
+                validate = true,
+                hover = true,
+                completion = true,
+                schemaStore = {
+                    enable = true,
+                    url = 'https://www.schemastore.org/api/json/catalog.json',
+                },
+                schemas = {
+                    kubernetes = { '/*.k8s.yaml', '/*.kubernetes.yaml', 'k8s/**/*.yaml', 'kubernetes/**/*.yaml' },
+                },
+            },
+        },
+    },
 
     -- Dart/Flutter LSP
     dart = {
@@ -87,13 +117,26 @@ local servers = {
     },
 }
 
+local tools = {
+    'ruff',
+    'golangci-lint',
+    'eslint_d',
+    'phpcs',
+    'jsonlint',
+    'tflint',
+    'hadolint',
+    'yamllint',
+    'shellcheck',
+    'markdownlint',
+}
+
 return {
     {
         'WhoIsSethDaniel/mason-tool-installer.nvim',
         config = function()
             -- Ensure the servers and tools above are installed
             require('mason-tool-installer').setup {
-                ensure_installed = vim.tbl_keys(servers),
+                ensure_installed = vim.list_extend(vim.tbl_keys(servers), tools),
                 auto_update = false,
                 run_on_start = true,
                 start_delay = 3000,
@@ -117,14 +160,14 @@ return {
         'mason-org/mason-lspconfig.nvim',
         dependencies = {
             'williamboman/mason.nvim',
+            'b0o/schemastore.nvim',
         },
         config = function()
             -- LSP servers and clients are able to communicate to each other what features they support.
             -- By default, Neovim doesn't support everything that is in the LSP specification.
-            -- When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
-            -- So, we create new capabilities with nvim-cmp, and then broadcast that to the servers.
+            -- blink.cmp augments capabilities, so advertise those to all servers.
             local capabilities = vim.lsp.protocol.make_client_capabilities()
-            capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+            capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
 
             require('mason-lspconfig').setup {
                 -- explicitly set to an empty table (populates installs via mason-tool-installer)
@@ -150,7 +193,6 @@ return {
         dependencies = {
             'mason-org/mason-lspconfig.nvim',
             'WhoIsSethDaniel/mason-tool-installer.nvim',
-            'hrsh7th/cmp-nvim-lsp',
 
             -- Useful status updates for LSP.
             { 'j-hui/fidget.nvim', opts = {} },
