@@ -27,7 +27,6 @@ local servers = {
             json = {
                 validate = { enable = true },
                 schemaDownload = { enable = true },
-                schemas = require('schemastore').json.schemas(),
             },
         },
     },
@@ -177,6 +176,17 @@ return {
                 handlers = {
                     function(server_name)
                         local server = servers[server_name] or {}
+
+                        -- schemastore.nvim is optional at startup; apply schemas only when available.
+                        if server_name == 'jsonls' then
+                            local ok, schemastore = pcall(require, 'schemastore')
+                            if ok then
+                                server.settings = server.settings or {}
+                                server.settings.json = server.settings.json or {}
+                                server.settings.json.schemas = schemastore.json.schemas()
+                            end
+                        end
+
                         -- This handles overriding only values explicitly passed
                         -- by the server configuration above. Useful when disabling
                         -- certain features of an LSP (for example, turning off formatting for tsserver)
