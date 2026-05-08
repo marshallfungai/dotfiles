@@ -119,6 +119,11 @@ install_neovim_latest() {
         sudo mv "${tmpdir}/nvim-linux-${arch}" /opt/nvim || { rm -rf "$tmpdir"; echo "Error: failed to move Neovim into /opt/nvim" >&2; return 1; }
         sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
         rm -rf "$tmpdir"
+
+        # Avoid conflicting binaries/runtimes from stale distro neovim.
+        if dpkg -s neovim >/dev/null 2>&1; then
+          sudo apt-get remove -y neovim || true
+        fi
       fi
       ;;
     brew)
