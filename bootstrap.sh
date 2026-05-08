@@ -61,7 +61,10 @@ install_tool() {
   IFS=':' read -r os_type pkg_manager <<< "$(get_pkg_manager)"
 
   case "$tool" in
-    stow|git|tmux|neovim|curl|unzip|fzf|terraform|awscli)
+    neovim)
+      install_neovim_latest
+      ;;
+    stow|git|tmux|curl|unzip|fzf|terraform|awscli)
       install_pkg "$tool"
       ;;
     ripgrep)

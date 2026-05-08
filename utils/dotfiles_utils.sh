@@ -43,6 +43,65 @@ get_pkg_manager() {
   echo "${os_type}:${pkg_manager}"
 }
 
+PKG_INDEX_UPDATED=0
+
+refresh_pkg_index() {
+  if [[ "${PKG_INDEX_UPDATED}" -eq 1 ]]; then
+    return 0
+  fi
+
+  IFS=':' read -r os_type pkg_manager <<< "$(get_pkg_manager)"
+  case "$pkg_manager" in
+    apt)
+      sudo apt-get update -y
+      ;;
+    yum)
+      sudo yum makecache -y
+      ;;
+    pacman)
+      sudo pacman -Sy --noconfirm
+      ;;
+    brew)
+      brew update
+      ;;
+    *)
+      echo "Error: No supported package manager found for $os_type!" >&2
+      return 1
+      ;;
+  esac
+
+  PKG_INDEX_UPDATED=1
+}
+
+install_neovim_latest() {
+  IFS=':' read -r os_type pkg_manager <<< "$(get_pkg_manager)"
+
+  refresh_pkg_index
+
+  case "$pkg_manager" in
+    apt)
+      if command -v add-apt-repository &> /dev/null; then
+        sudo add-apt-repository -y ppa:neovim-ppa/stable
+        sudo apt-get update -y
+      fi
+      sudo apt-get install -y neovim || { echo "Failed to install neovim"; return 1; }
+      ;;
+    brew)
+      brew install neovim || brew upgrade neovim
+      ;;
+    yum)
+      sudo yum install -y neovim || { echo "Failed to install neovim"; return 1; }
+      ;;
+    pacman)
+      sudo pacman -S --noconfirm neovim || { echo "Failed to install neovim"; return 1; }
+      ;;
+    *)
+      echo "Error: No supported package manager found for $os_type!" >&2
+      return 1
+      ;;
+  esac
+}
+
 
 # Install a package
 install_pkg() {
@@ -56,6 +115,7 @@ install_pkg() {
     return 1
   fi
   IFS=':' read -r os_type pkg_manager <<< "$(get_pkg_manager)"
+  refresh_pkg_index
 
   case "$pkg_manager" in
     apt)
