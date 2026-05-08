@@ -84,7 +84,42 @@ install_neovim_latest() {
         sudo add-apt-repository -y ppa:neovim-ppa/stable
         sudo apt-get update -y
       fi
-      sudo apt-get install -y neovim || { echo "Failed to install neovim"; return 1; }
+      sudo apt-get install -y neovim || true
+
+      # Ubuntu/Debian repos (and some PPAs on newer releases) can lag.
+      # If installed version is below 0.10, install upstream stable binary.
+      local installed_version=""
+      if command -v nvim &> /dev/null; then
+        installed_version="$(nvim --version | sed -n '1s/^NVIM v//p')"
+      fi
+
+      if [[ -z "$installed_version" ]] || ! dpkg --compare-versions "$installed_version" ge "0.10.0"; then
+        local arch archive base_url tmpdir
+        case "$(uname -m)" in
+          x86_64|amd64) arch="x86_64" ;;
+          aarch64|arm64) arch="arm64" ;;
+          *)
+            echo "Error: unsupported architecture for upstream neovim binary: $(uname -m)" >&2
+            return 1
+            ;;
+        esac
+
+        archive="nvim-linux-${arch}.tar.gz"
+        base_url="https://github.com/neovim/neovim/releases/download/stable"
+        tmpdir="$(mktemp -d)"
+
+        if ! curl -fsSL "${base_url}/${archive}" -o "${tmpdir}/${archive}"; then
+          echo "Error: failed to download Neovim stable archive from ${base_url}/${archive}" >&2
+          rm -rf "$tmpdir"
+          return 1
+        fi
+
+        tar -xzf "${tmpdir}/${archive}" -C "$tmpdir" || { rm -rf "$tmpdir"; echo "Error: failed to extract Neovim archive" >&2; return 1; }
+        sudo rm -rf /opt/nvim
+        sudo mv "${tmpdir}/nvim-linux-${arch}" /opt/nvim || { rm -rf "$tmpdir"; echo "Error: failed to move Neovim into /opt/nvim" >&2; return 1; }
+        sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+        rm -rf "$tmpdir"
+      fi
       ;;
     brew)
       brew install neovim || brew upgrade neovim

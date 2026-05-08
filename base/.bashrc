@@ -111,7 +111,6 @@ set_terminal_title() {
 }
 
 PROMPT_COMMAND="set_terminal_title;build_prompt"
-unset color_prompt
 
 # Common tracked aliases/functions
 [ -f "$HOME/.bash_aliases" ] && . "$HOME/.bash_aliases"

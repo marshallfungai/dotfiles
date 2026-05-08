@@ -4,6 +4,7 @@
 
 return { -- Highlight, edit, and navigate code
   'nvim-treesitter/nvim-treesitter',
+  enabled = vim.fn.has 'nvim-0.10' == 1,
   build = ':TSUpdate',
   main = 'nvim-treesitter.config', -- New treesitter module entrypoint
   -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
